@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import CategoriesList from './CategoriesList';
 import NewCategoryForm from './NewCategoryForm';
 import CategoryDetail from './CategoryDetail';
@@ -10,21 +10,38 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 function App(props) {
-  console.log(props.location.pathname);
   
-  return (
-    <div className="container">
-      <Header currentRouterPath={props.location.pathname}/>
-      <Switch>
-        <Route exact path='/' render={()=><CategoriesList categoryList={props.categoryList}/>} />
-        <Route exact path='/new-category' render={()=><NewCategoryForm />} />
-        {/* <Route path={`/:categoryName`} render={({match})=><Category />}/> */}
-        <Route exact path={`/:categoryName/:categoryId`} component={CategoryDetail} />
-        <Route exact path={`/:categoryName/:categoryId/new-to-do`} component={NewToDoForm} />
-      </Switch>
-    </div>
-  );
-}
+  getCategories = async () => {
+    const response = await fetch('/api/Data/GetCategories');
+
+    const categories = await response.json();
+    return categories;
+  };
+
+  const [category, setCategory] = useState([]);
+  
+  useEffect(() => {
+    getCategories().then(list => {
+      setCategory(list)
+    })
+  }, [])
+  
+  console.log(category);
+  
+    return (
+      <div className="container">
+        <Header currentRouterPath={props.location.pathname}/>
+        <Switch>
+          <Route exact path='/' render={()=><CategoriesList categoryList={props.categoryList}/>} />
+          <Route exact path='/new-category' render={()=><NewCategoryForm />} />
+          {/* <Route path={`/:categoryName`} render={({match})=><Category />}/> */}
+          <Route exact path={`/:categoryName/:categoryId`} component={CategoryDetail} />
+          <Route exact path={`/:categoryName/:categoryId/new-to-do`} component={NewToDoForm} />
+        </Switch>
+      </div>
+    );
+  }
+
 
 const mapStateToProps = state => {
   return {
